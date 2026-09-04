@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Krishna Dot Art</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #020b2b;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+
+    .poster {
+        width: 100%;
+        max-width: 1100px;
+        min-height: 100vh;
+        position: relative;
+        background:
+            radial-gradient(circle at center, #071d55 0%, #020b2b 65%);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 30px;
+        overflow: hidden;
+    }
+
+    .stars {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .stars span {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #55cfff;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #55cfff;
+    }
+
+    .left {
+        width: 40%;
+        text-align: center;
+        z-index: 2;
+    }
+
+    .happy {
+        color: white;
+        font-size: 30px;
+        letter-spacing: 10px;
+        margin-bottom: 10px;
+    }
+
+    h1 {
+        color: #ffd33d;
+        font-size: clamp(50px, 7vw, 90px);
+        font-family: cursive;
+        font-style: italic;
+        margin: 0;
+    }
+
+    h2 {
+        color: white;
+        font-size: clamp(35px, 5vw, 65px);
+        margin-top: -10px;
+    }
+
+    .line {
+        width: 80%;
+        height: 2px;
+        background: #eab52d;
+        margin: 20px auto;
+    }
+
+    .message {
+        color: white;
+        font-size: 20px;
+        line-height: 1.6;
+    }
+
+    .matki {
+        margin-top: 35px;
+        font-size: 70px;
+    }
+
+    #canvas {
+        width: 55%;
+        max-width: 600px;
+        height: auto;
+        z-index: 2;
+    }
+
+    @media(max-width:700px) {
+        .poster {
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left {
+            width: 100%;
+        }
+
+        #canvas {
+            width: 95%;
+        }
+
+        .happy {
+            font-size: 20px;
+        }
+
+        .message {
+            font-size: 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="poster">
+
+    <div class="stars" id="stars"></div>
+
+    <div class="left">
+
+        <div class="happy">HAPPY</div>
+
+        <h1>Krishna</h1>
+
+        <h2>Janmashtami</h2>
+
+        <div class="line"></div>
+
+        <div class="message">
+            May Lord Krishna bless you<br>
+            with happiness, peace<br>
+            and prosperity.
+        </div>
+
+        <div class="matki">🪷 🏺 🦚</div>
+
+    </div>
+
+    <!-- Krishna Dot Art -->
+    <canvas id="canvas"></canvas>
+
+</div>
+
+<!-- Original image used for creating dots -->
+<img id="krishnaImage"
+     src="krishna.jpg"
+     style="display:none;">
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const img = document.getElementById("krishnaImage");
+
+const WIDTH = 600;
+const HEIGHT = 700;
+
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
+
+
+/* Background stars */
+
+const stars = document.getElementById("stars");
+
+for(let i = 0; i < 100; i++){
+
+    let star = document.createElement("span");
+
+    star.style.left = Math.random() * 100 + "%";
+    star.style.top = Math.random() * 100 + "%";
+
+    let size = Math.random() * 4 + 1;
+
+    star.style.width = size + "px";
+    star.style.height = size + "px";
+
+    stars.appendChild(star);
+}
+
+
+/* Convert Krishna image into dots */
+
+img.onload = function(){
+
+    const temp = document.createElement("canvas");
+    const tctx = temp.getContext("2d");
+
+    temp.width = WIDTH;
+    temp.height = HEIGHT;
+
+    tctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+
+    const data = tctx.getImageData(
+        0,
+        0,
+        WIDTH,
+        HEIGHT
+    ).data;
+
+    ctx.clearRect(0,0,WIDTH,HEIGHT);
+
+    /*
+       Change this number:
+
+       3 = very small dots
+       5 = medium dots
+       7 = large dots
+    */
+
+    const gap = 6;
+
+    for(let y = 0; y < HEIGHT; y += gap){
+
+        for(let x = 0; x < WIDTH; x += gap){
+
+            let index =
+                (y * WIDTH + x) * 4;
+
+            let r = data[index];
+            let g = data[index + 1];
+            let b = data[index + 2];
+
+            let brightness =
+                (r + g + b) / 3;
+
+            /*
+              Dark areas = bigger/brighter dots
+            */
+
+            let radius =
+                brightness < 70 ? 3 :
+                brightness < 130 ? 2.5 :
+                brightness < 190 ? 1.8 :
+                1;
+
+            /*
+              Make blue Krishna skin stronger
+            */
+
+            if(b > r * 1.2){
+                r = 30;
+                g = 150;
+                b = 255;
+            }
+
+            /*
+              Gold / yellow areas
+            */
+
+            if(r > 150 && g > 100 && b < 100){
+                r = 255;
+                g = 190;
+                b = 40;
+            }
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                `rgb(${r},${g},${b})`;
+
+            ctx.fill();
+        }
+    }
+};
+
+
+/* If image doesn't load */
+
+img.onerror = function(){
+
+    ctx.fillStyle = "white";
+    ctx.font = "25px Arial";
+    ctx.textAlign = "center";
+
+    ctx.fillText(
+        "Put Krishna image as krishna.jpg",
+        WIDTH / 2,
+        HEIGHT / 2
+    );
+
+};
+
+</script>
+
+</body>
+  </html>
